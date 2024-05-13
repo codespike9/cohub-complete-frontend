@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RiMenu3Line, RiCloseLine } from "react-icons/ri";
 import { Link, useNavigate } from "react-router-dom";
 import "./navbar.css";
 import { useAuth } from "../../Contexts/AuthContext";
+import { useInfo } from "../../Contexts/UserInfoContext";
 
 const Menu = () => (
   <>
     <p>
-      <a href="#home">Home</a>
+      <Link to={'/'}>Home</Link>
     </p>
     <p>
       <a href="#wcohub">What is Co-HUB?</a>
@@ -18,6 +19,7 @@ const Menu = () => (
 const Navbar = () => {
 
   const { loggedIn,logout } = useAuth();
+  const { userinfo, addUserInfo } = useInfo();
   const [toggleMenu, setToggleMenu] = useState(false);
   const navigate = useNavigate();
   const registerOnClick = () => {
@@ -27,7 +29,11 @@ const Navbar = () => {
     logout();
     navigate("/");
   };
-  handleLogout
+  
+  useEffect(() => {
+    addUserInfo();
+  }, []);
+
   return (
     <div className="cohub__navbar">
       <div className="cohub__navbar-links">
@@ -50,7 +56,7 @@ const Navbar = () => {
             </div>
             <div className="cohub__navbar-sign">
               <p>
-                Welcome, User!
+                Welcome, {userinfo && userinfo.name}
               </p>
               <button type="button" onClick={handleLogout}>
                 LogOut

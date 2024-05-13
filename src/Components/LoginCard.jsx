@@ -15,7 +15,6 @@ export default function LoginCard() {
           navigate('/dashboard');
         })
         .catch((error)=>console.error(error));
-
   };
 
   return (

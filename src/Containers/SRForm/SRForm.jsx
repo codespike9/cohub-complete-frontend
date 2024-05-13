@@ -25,7 +25,69 @@ const SRForm = () => {
 
   const { loggedIn } = useAuth();
   const navigate = useNavigate();
+  const [map, setMap] = useState(null);
+  const [marker, setMarker] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState(null);
 
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_APP_GOOGLE_MAPS_API}&libraries=places`;
+    script.async = true;
+    document.body.appendChild(script);
+
+    script.onload = () => {
+      const mapInstance = new window.google.maps.Map(document.getElementById('map'), {
+        center: { lat: 0, lng: 0 }, // Initial center
+        zoom: 8, // Initial zoom level
+      });
+
+      setMap(mapInstance);
+
+      const autocompleteInput = document.getElementById('autocomplete');
+
+      // Initialize Places Autocomplete service
+      const autocomplete = new window.google.maps.places.Autocomplete(autocompleteInput);
+
+      // Bind the Places Autocomplete to the map
+      autocomplete.bindTo('bounds', mapInstance);
+
+      // Listen for place changed event
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        if (!place.geometry || !place.geometry.location) {
+          console.error('Place not found or has no geometry');
+          return;
+        }
+        const location = place.geometry.location;
+        placeMarker(location);
+        mapInstance.setCenter(location);
+        mapInstance.setZoom(15); // Zoom in to the selected location
+      });
+
+      // Listen for click event on map to place marker
+      mapInstance.addListener('click', (event) => {
+        placeMarker(event.latLng);
+      });
+    };
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  const placeMarker = (location) => {
+    if (marker) {
+      marker.setPosition(location);
+    } else {
+      const newMarker = new window.google.maps.Marker({
+        position: location,
+        map: map,
+        draggable: true,
+      });
+      setMarker(newMarker);
+    }
+    setSelectedLocation(location.toJSON());
+  };
 
   useEffect(() => {
     if (!loggedIn) {
@@ -65,7 +127,7 @@ const SRForm = () => {
       formData.append("rentPrice_perDay", productInfo.rentPrice_perDay);
       formData.append("pickup_location", JSON.stringify({
         type: 'Point',
-        coordinates: [parseFloat(productInfo.longitude), parseFloat(productInfo.latitude)]
+        coordinates: [parseFloat(selectedLocation.lng), parseFloat(selectedLocation.lat)]
       }));
       formData.append("image", productInfo.image);
       formData.append("video", productInfo.video);
@@ -135,19 +197,30 @@ const SRForm = () => {
               </div>
               <div className="price_image">
                 <div className="price">
-                  <input type="text" onChange={handleInputChange} name="selling_price" placeholder="Enter Selling Price" required />
+                  <input type="text" onChange={handleInputChange} name="selling_price" placeholder="Enter Selling Price" />
                 </div>
               </div>
               <div className="price_image">
                 <div className="price">
-                  <input type="text" onChange={handleInputChange} name="rentPrice_perDay" placeholder="Enter Renting/Day" required />
+                  <input type="text" onChange={handleInputChange} name="rentPrice_perDay" placeholder="Enter Renting/Day" />
                 </div>
               </div>
-              <div className="pickup_location">
+              {/* <div className="pickup_location">
                 <input type="text" name="latitude" onChange={handleInputChange} placeholder="Latitude" required />
               </div>
               <div className="pickup_location">
                 <input type="text" name="longitude" onChange={handleInputChange} placeholder="Longitude" required />
+              </div> */}
+              <div>Choose pickup location</div>
+              <input
+                id="autocomplete"
+                placeholder="Search for a location"
+                type="text"
+                style={{ width: '100%', marginBottom: '10px' }}
+              />
+              <div id="map" style={{ height: '400px', width: '100%' }}>
+
+
               </div>
               <div className="product_image">
                 <label>Upload image </label>

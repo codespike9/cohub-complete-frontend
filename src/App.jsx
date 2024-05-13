@@ -16,12 +16,15 @@ import StartProjectForm from "./pages/Projects/StartProjectForm";
 import ProductList from "./pages/MyProduct/MyProduct";
 import RentedProducts from "./pages/MyProduct/RentedProducts";
 import { AuthProvider } from "./Contexts/AuthContext";
+import { UserInfoProvider } from "./Contexts/UserInfoContext";
+import ProjectDetailsPage from "./pages/Project/ProjectDetailsPage";
 
 const App = () => {
   return (
     <div>
       <Router>
         <AuthProvider>
+          <UserInfoProvider>
           <Routes>
             <Route exact path="/" element={<HomePage />} />
             <Route path="/start-project" element={<StartProjectForm />} />
@@ -34,8 +37,10 @@ const App = () => {
             <Route path="/dashboard/my-product" element={<ProductList />} />
             <Route path="/dashboard/rented-products" element={<RentedProducts />} />
             <Route path="*" element={<Navigate to="/" />} />
-            
+            <Route path="/project-details/:projectId" element={<ProjectDetailsPage/>} />
+
           </Routes>
+          </UserInfoProvider>
         </AuthProvider>
       </Router>
     </div>

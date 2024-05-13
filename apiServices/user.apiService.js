@@ -23,7 +23,7 @@ class UserApiService {
             throw error; // Throw the error for the caller to handle
         }
     }
-
+    
     async userRegistration(data){
         try {
             const bearerToken=getBearerToken();
@@ -38,6 +38,19 @@ class UserApiService {
         } catch (error) {
             console.error("Error in signing up",error);
             return false;
+        }
+    }
+    async getUserInfo(){
+        try {
+            const bearerToken=getBearerToken();
+            const response=await axios.get(`${this.api}/getUserInfo`,{
+                headers:{
+                    'Authorization':`Bearer ${bearerToken}`
+                }
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Error in signing up",error);
         }
     }
 
@@ -96,6 +109,50 @@ class UserApiService {
             console.log('Error fetching my rented products:', error);
         }
     }
+
+    async fetchAllProducts(){
+        try {
+            const bearerToken=getBearerToken();
+            console.log(bearerToken);
+            const response=await axios.get(`${this.api}/getAllProduct`,{
+                headers:{
+                    'Authorization':`Bearer ${bearerToken}`
+                }
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching all products:",error);
+        }
+    }
+
+    async getBookingPaymentSummary(){
+        try {
+            const bearerToken=getBearerToken();
+            const response=await axios.get(`${this.api}/bookingPayment`,{
+                headers:{
+                    'Authorization':`Bearer ${bearerToken}`
+                }
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Error getting booking payment summary.",error);
+        }
+    }
+
+    async getOrderPaymentSummary(id,data){
+        try{
+            const bearerToken=getBearerToken();
+            const response=await axios.post(`${this.api}/getBuyOrderSummary/${id}`,data,{
+                headers:{
+                    'Authorization':`Bearer ${bearerToken}`
+                }
+            });
+            return response.data;
+        }catch(error){
+            console.error('Error getting order payment summary.',error);
+        }
+    }
+
 }
 
 const userApiService = new UserApiService();
